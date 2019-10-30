@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 
 from bs4 import BeautifulSoup
@@ -29,7 +30,7 @@ def get_page_source(url):
     :param url: string
     :return: string
     """
-    browser = webdriver.Chrome('/Users/nitrix/Downloads/chromedriver')
+    browser = webdriver.Chrome('chromedriver')
     browser.get(url)
     return browser.page_source
 
@@ -76,9 +77,24 @@ def write_to_file(links_page_source_map):
     :param links_page_source_map: dict a map of the links to the page source
     :return None
     """
+    page_source_directory = 'page_sources'
+    init_page_source_directory(page_source_directory)
     for name, page_source in links_page_source_map.items():
-        with open(f'{name}.html', 'w') as fp:
+        with open(f'{page_source_directory}/{name}.html', 'w') as fp:
             fp.write(page_source)
+
+
+def init_page_source_directory(directory):
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+
+    for file_ in os.listdir(directory):
+        file_path = os.path.join(directory, file_)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as exc:
+            logger.warning(f'Failed to delete file: {file_path}! Error: {str(exc)}')
 
 
 if __name__ == '__main__':
